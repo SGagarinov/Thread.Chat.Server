@@ -13,16 +13,16 @@ import java.util.concurrent.Executors;
 
 public class Server {
 
-    static ExecutorService executeIt = Executors.newFixedThreadPool(4);
+    static ExecutorService executeIt = Executors.newFixedThreadPool(10);
     static Set<ClientInfo> users = ConcurrentHashMap.newKeySet();
+    static Config config;
 
     public static void main(String[] args) {
         //Считываем конфиг
         System.out.println("Input files path");
         Scanner scanner = new Scanner(System.in);
-        String path = scanner.next();
-        Config config = new Config(path, 2);
 
+        getConfig(scanner.next());
         //Создаём и запускаем сервер
         try(ServerSocket server = new ServerSocket(config.getPort())) {
 
@@ -32,11 +32,16 @@ public class Server {
                 //Ожидаем нового клиента
                 Socket client = server.accept();
                 //Запускаем отдельный поток для клиента
-                executeIt.execute(new ThreadClient(client, users, config.getChatName(), path));
+                executeIt.execute(new ThreadClient(client, users, config.getChatName(), config.getPath()));
             }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void getConfig(String path) {
+        //Считываем конфиг
+        config = new Config(path, 2);
     }
 }

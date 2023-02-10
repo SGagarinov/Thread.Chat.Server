@@ -8,7 +8,10 @@ public class Config {
     private Integer port;
     private String chatName;
 
+    private String path;
+
     public Config(String path, int count) {
+        this.path = path;
         try(BufferedReader reader = new BufferedReader(new FileReader(path + "/settings.config"));)
         {
             String[] configLines = new String[2];
@@ -39,5 +42,13 @@ public class Config {
 
     public void setChatName(String chatName) {
         this.chatName = chatName;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

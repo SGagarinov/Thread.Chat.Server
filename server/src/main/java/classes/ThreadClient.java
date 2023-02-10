@@ -77,7 +77,7 @@ public class ThreadClient implements Runnable{
                     in.close();
                     out.close();
                     clientDialog.close();
-                    return;
+                    users.remove(info);
                 }
             }
 
