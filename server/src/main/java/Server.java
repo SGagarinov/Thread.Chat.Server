@@ -1,34 +1,41 @@
-import java.io.BufferedReader;
+import classes.ClientInfo;
+import classes.Config;
+import classes.ThreadClient;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    static ExecutorService executeIt = Executors.newFixedThreadPool(2);
+
+    static ExecutorService executeIt = Executors.newFixedThreadPool(4);
+    static Set<ClientInfo> users = ConcurrentHashMap.newKeySet();
 
     public static void main(String[] args) {
+        //Считываем конфиг
+        System.out.println("Input files path");
+        Scanner scanner = new Scanner(System.in);
+        String path = scanner.next();
+        Config config = new Config(path, 2);
 
-        try (ServerSocket server = new ServerSocket(8888); BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+        //Создаём и запускаем сервер
+        try(ServerSocket server = new ServerSocket(config.getPort())) {
+
             System.out.println("Server started. Waiting clients...");
-
             while (!server.isClosed()) {
-                if (br.ready()) {
 
-                    String serverCommand = br.readLine();
-                    Socket client = server.accept();
-
-                    executeIt.execute(new ClientHandler(client));
-                    System.out.print("Connection accepted.");
-
-                }
+                //Ожидаем нового клиента
+                Socket client = server.accept();
+                //Запускаем отдельный поток для клиента
+                executeIt.execute(new ThreadClient(client, users, config.getChatName(), path));
             }
-
-            executeIt.shutdown();
-        } catch (
-                IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
